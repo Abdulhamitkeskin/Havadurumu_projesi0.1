@@ -1,51 +1,59 @@
+import tkinter as tk
+from PIL import Image, ImageTk
 import requests
 
-
-def weather(api_key, city_name):
-    base_url = "https://api.openweathermap.org/data/2.5/weather"
-    params = {
-        "q": city_name,
-        "appid": api_key,
-        "units": "metric"
-
-    }
-    response = requests.get(base_url, params=params)
+def get_weather():
+    city = city_entry.get()
+    api_key = "38ddfa48fc3d4d2222f95a4eaf2bd909"
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    response = requests.get(url)
+    weather_data = response.json()
 
     if response.status_code == 200:
-        data = response.json()
-        print(f"Hava Durumu Bilgileri - {city_name}")
-        print(f"Sıcaklık: {data['main']['temp']}°C")
-        print(f"Nem Oranı: {data['main']['humidity']}%")
-        print(f"Rüzgar Hızı: {data['wind']['speed']} m/s")
-        print(f"Hava Durumu: {data['weather'][0]['description']}")
+        temperature_label.config(text=f"Sıcaklık: {weather_data['main']['temp']}°C")
+        humidity_label.config(text=f"Nem Oranı: {weather_data['main']['humidity']}%")
+        wind_label.config(text=f"Rüzgar Hızı: {weather_data['wind']['speed']} m/s")
+        description_label.config(text=f"Hava Durumu: {weather_data['weather'][0]['description']}")
     else:
-        print(f"Hata: {response.status_code}")
-        print(response.text)
+        temperature_label.config(text="Hava durumu bilgileri alınamadı.")
+        humidity_label.config(text="")
+        wind_label.config(text="")
+        description_label.config(text="")
 
 
-while True:
-    process = input("Hava durumuna bakmak için '1' çıkış yapmak için '2 basınız:")
+window = tk.Tk()
+window.title("Hava Durumu Programı")
+window.geometry("900x800")
 
-    try:
+# Arka plan resmi
+background_image = Image.open("background_image.jpg")
+background_image = background_image.resize((900, 800))
+background_photo = ImageTk.PhotoImage(background_image)
+background_label = tk.Label(window, image=background_photo)
+background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-        if int(process) == 1:
+# Şehir giriş kutusu ve Buton
+city_label = tk.Label(window, text="Şehir Adı:", bg="white", font=("Arial", 12))
+city_label.place(relx=0.1, rely=0.1, relwidth=0.3, relheight=0.05)
 
-            api_key = "38ddfa48fc3d4d2222f95a4eaf2bd909"
+city_entry = tk.Entry(window, bg="white", font=("Arial", 12))
+city_entry.place(relx=0.4, rely=0.1, relwidth=0.4, relheight=0.05)
 
-            city_name = input("Hava durumu bilgilerini almak istediğiniz şehir adını girin: ")
+get_weather_button = tk.Button(window, text="Hava Durumu Getir", command=get_weather, bg="lightblue", font=("Arial", 12))
+get_weather_button.place(relx=0.3, rely=0.18, relwidth=0.4, relheight=0.05)
 
-            weather(api_key, city_name)
-        elif int(process) == 2:
-            break
-        else:
-            print("Lütfen beriltilen aralıkta sayı giriniz")
+# Hava Durumu Bilgileri Etiketleri
+temperature_label = tk.Label(window, text="", bg="white", font=("Arial", 12))
+temperature_label.place(relx=0.1, rely=0.3, relwidth=0.8, relheight=0.1)
 
+humidity_label = tk.Label(window, text="", bg="white", font=("Arial", 12))
+humidity_label.place(relx=0.1, rely=0.4, relwidth=0.8, relheight=0.1)
 
-    except:
-        print("Lütfen belirtilen aralıkta sayıyı giriniz")
-        continue
+wind_label = tk.Label(window, text="", bg="white", font=("Arial", 12))
+wind_label.place(relx=0.1, rely=0.5, relwidth=0.8, relheight=0.1)
 
-    if (int(process) == 2):
-        break
+description_label = tk.Label(window, text="", bg="white", font=("Arial", 12))
+description_label.place(relx=0.1, rely=0.6, relwidth=0.8, relheight=0.1)
 
+window.mainloop()
 
